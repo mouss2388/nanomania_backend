@@ -24,6 +24,7 @@ import lombok.ToString;
 public class VideoGame {
 	
 	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+	@JsonIgnore
 	private int id;
 	private String name;
 	private LocalDate dateRelease;
