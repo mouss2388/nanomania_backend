@@ -119,6 +119,6 @@ public class VideoGameController {
 		this.videoGameRepository.delete(game.get());
 		return new ResponseEntity<Map<String,Object>>(
 				Collections.singletonMap("id_deleted", copyGame.getId()),
-				HttpStatus.ACCEPTED);
+				HttpStatus.OK);
 	}
 }
