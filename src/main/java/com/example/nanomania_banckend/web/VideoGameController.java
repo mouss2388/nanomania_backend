@@ -67,14 +67,14 @@ public class VideoGameController {
 				.findAll(page);
 	}
 
-	
+
 	@GetMapping(value = "/{id:[0-9]+}")
 	public ResponseEntity<VideoGameInfoComplet> findByIdPathVar(@PathVariable("id") int id){
 		Optional<VideoGame> gameOriginal = this.videoGameRepository.findById(id);
 		if(! gameOriginal.isPresent())
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		return new ResponseEntity<VideoGameInfoComplet>(projectionFactory.createProjection(VideoGameInfoComplet.class,
-								gameOriginal), HttpStatus.OK);
+				gameOriginal), HttpStatus.OK);
 	}
 
 	@GetMapping
@@ -83,15 +83,26 @@ public class VideoGameController {
 		if(! gameOriginal.isPresent())
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		return new ResponseEntity<VideoGameInfoComplet>(projectionFactory.createProjection(VideoGameInfoComplet.class,
-								gameOriginal), HttpStatus.OK);
+				gameOriginal), HttpStatus.OK);
 	}
 
 	@PostMapping
 	public ResponseEntity<VideoGame> createVideoGame(
-			@RequestBody VideoGame videoGame
+			@RequestBody VideoGame game,
+			@RequestParam("genresId") List<Integer> genresId,
+			@RequestParam("platformsId") List<Integer> platformsId
 			){
-		videoGame = videoGameRepository.save(videoGame);
-		return new ResponseEntity<VideoGame>(videoGame, HttpStatus.CREATED);
+		
+		Iterable<Genre>  newGenres = this.genreRepository.findAllById(genresId);
+		Iterable<Platform>  newPlatforms = this.platformRepository.findAllById(platformsId);
+		
+		for (Platform platform : newPlatforms) 
+			game.getPlatforms().add(platform);
+		for (Genre genre : newGenres) 
+			game.getGenres().add(genre);
+
+		//game = videoGameRepository.save(game);
+		return new ResponseEntity<VideoGame>(game, HttpStatus.CREATED);
 	}
 
 	@PutMapping
@@ -106,11 +117,11 @@ public class VideoGameController {
 
 		if (!originalGame.isPresent()) 
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		
+
 		if(editorId == 0) 
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-		
-		
+
+
 
 		Optional<Editor> newEditor =  this.editorRepository.findById(editorId);
 		Iterable<Genre>  newGenres = this.genreRepository.findAllById(genresId);
@@ -134,17 +145,17 @@ public class VideoGameController {
 		//Ajoute les nouveaux genres et plateformes
 		for (Genre genre : newGenres) 
 			editedGame.getGenres().add(genre);
-		
+
 		for (Platform platform : newPlatforms) 
 			editedGame.getPlatforms().add(platform);
-		
+
 		editedGame = videoGameRepository.save(editedGame);
 
 		return new ResponseEntity<VideoGameInfoComplet>(
 				projectionFactory.createProjection(VideoGameInfoComplet.class, editedGame)
 				,HttpStatus.ACCEPTED);
 	}
-	
+
 
 	@DeleteMapping
 	public ResponseEntity<Map<String, Object>> deleteVideoGame(@RequestParam("gameId")  int gameId){
