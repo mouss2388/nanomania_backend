@@ -101,16 +101,16 @@ public class VideoGameController {
 		for (Genre genre : newGenres) 
 			game.getGenres().add(genre);
 
-		//game = videoGameRepository.save(game);
+		game = videoGameRepository.save(game);
 		return new ResponseEntity<VideoGame>(game, HttpStatus.CREATED);
 	}
 
 	@PutMapping
 	public ResponseEntity<VideoGameInfoComplet> updateGame(
 			@RequestBody VideoGame game,
-			@RequestParam("editorId") int editorId,
-			@RequestParam("genresId") List<Integer> genresId,
-			@RequestParam("platformsId") List<Integer> platformsId
+			@RequestParam("editorId") Optional<Integer> editorId,
+			@RequestParam("genresId") Optional<List<Integer>> genresId,
+			@RequestParam("platformsId") Optional<List<Integer>> platformsId
 			){
 
 		Optional<VideoGame> originalGame =  this.videoGameRepository.findById(game.getId());
@@ -118,22 +118,18 @@ public class VideoGameController {
 		if (!originalGame.isPresent()) 
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
-		if(editorId == 0) 
+		if( editorId.isPresent()  &&  editorId.get() == 0) 
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
 
 
-		Optional<Editor> newEditor =  this.editorRepository.findById(editorId);
-		Iterable<Genre>  newGenres = this.genreRepository.findAllById(genresId);
-		Iterable<Platform>  newPlatforms = this.platformRepository.findAllById(platformsId);
-
-
-
-		/**
-		 * Check if newGenres et new Platforms are empty then BAD_REQUEST
-		 */
-		if(!newEditor.isPresent())
-			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		Optional<Editor> newEditor =  this.editorRepository.findById(editorId.get());
+		Iterable<Genre>  newGenres = null;
+		Iterable<Platform> newPlatforms = null ;
+		if(genresId.isPresent()) 
+			newGenres = this.genreRepository.findAllById(genresId.get());
+		if(platformsId.isPresent())	 
+			newPlatforms = this.platformRepository.findAllById(platformsId.get());
 
 
 		VideoGame editedGame = originalGame.get();
