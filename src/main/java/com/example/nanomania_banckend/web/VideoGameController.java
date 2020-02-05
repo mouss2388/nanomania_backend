@@ -1,6 +1,7 @@
 package com.example.nanomania_banckend.web;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -95,7 +96,9 @@ public class VideoGameController {
 		
 		Iterable<Genre>  newGenres = this.genreRepository.findAllById(genresId);
 		Iterable<Platform>  newPlatforms = this.platformRepository.findAllById(platformsId);
-		
+		game.setGenres(new HashSet());
+		game.setPlatforms(new HashSet());
+
 		for (Platform platform : newPlatforms) 
 			game.getPlatforms().add(platform);
 		for (Genre genre : newGenres) 
