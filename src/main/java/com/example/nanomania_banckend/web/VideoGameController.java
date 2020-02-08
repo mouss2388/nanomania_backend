@@ -1,9 +1,7 @@
 package com.example.nanomania_banckend.web;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,11 +24,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.nanomania_banckend.models.Editor;
 import com.example.nanomania_banckend.models.Genre;
+import com.example.nanomania_banckend.models.Image;
 import com.example.nanomania_banckend.models.Platform;
 import com.example.nanomania_banckend.models.VideoGame;
 import com.example.nanomania_banckend.models.projections.VideoGameInfoComplet;
 import com.example.nanomania_banckend.repositories.EditorRepository;
 import com.example.nanomania_banckend.repositories.GenreRepository;
+import com.example.nanomania_banckend.repositories.ImageRepository;
 import com.example.nanomania_banckend.repositories.PlatformRepository;
 import com.example.nanomania_banckend.repositories.VideoGameRepository;
 
@@ -54,6 +54,8 @@ public class VideoGameController {
 	private GenreRepository genreRepository;
 	@Autowired
 	private PlatformRepository platformRepository;
+	@Autowired
+	private ImageRepository imageRepository;
 
 
 	@GetMapping("/list")
@@ -106,8 +108,8 @@ public class VideoGameController {
 
 		if(game.getId()!= 0 || game.getName().trim().isEmpty())
 			return new ResponseEntity<VideoGame>(HttpStatus.BAD_REQUEST);
-		
-		
+
+
 		game.setEditor(editorOpt.get());
 		Iterable<Genre>  newGenres = null;
 		game.setGenres(new HashSet());
@@ -141,9 +143,9 @@ public class VideoGameController {
 				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
 		if( game.getName().trim().isEmpty())
-			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<>(HttpStatus.BAD_GATEWAY);
 
-		Optional<Editor> newEditor =  this.editorRepository.findById(editorId.get());
+		Editor newEditor =  this.editorRepository.findById(editorId.get()).get();
 		Iterable<Genre>  newGenres = new HashSet<>();
 		Iterable<Platform> newPlatforms = new HashSet<>() ;
 		if(genresId.isPresent()) 
@@ -154,10 +156,14 @@ public class VideoGameController {
 
 		VideoGame editedGame =game;
 
-		editedGame.setEditor(newEditor.get());
+		editedGame.setImages(game.getImages());
+
+
+		editedGame.setEditor(newEditor);
+
 		editedGame.setGenres(new HashSet<>());
 		editedGame.setPlatforms(new HashSet<>());
-	
+
 
 		//Ajoute les nouveaux genres et plateformes
 		for (Genre genre : newGenres) 
@@ -180,9 +186,15 @@ public class VideoGameController {
 
 		if (!this.videoGameRepository.existsById(gameId))
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		
+
 		VideoGame game = this.videoGameRepository.findById(gameId).get();
 		VideoGame copyGame = game;
+
+		for (Image img : game.getImages()) {
+			imageRepository.delete(img);
+			imageRepository.deleteImageFile(img);
+		}
+		game.getImages().clear();
 
 		this.videoGameRepository.delete(game);
 
