@@ -9,6 +9,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.PreRemove;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -35,6 +37,23 @@ public class VideoGame {
 	private Set<Genre> genres;
 	@ManyToMany @JsonIgnore
 	private Set<Platform> platforms;
+	@OneToMany(mappedBy = "videoGame")
+	private Set<Image> images;
+	
+	
+	@PreRemove
+	public void beforeDelete() {
+		if (genres != null) {
+			for (Genre genre : genres) 
+				genre.setVideoGames(null);
+			genres.clear();
+		}
+		if(platforms != null) {
+			for (Platform platform : platforms) 
+				platform.setVideoGames(null);
+			platforms.clear();
+		}	
+	}
 	
 	
 
