@@ -94,6 +94,9 @@ public class VideoGameControllerTest {
 	@Test
 	@DisplayName("test de la requette get pour un videoGame d'id 1")
 	public void findByIdPathVar() throws Exception {
+		when(videoGameRepository.existsById(1))
+		.thenReturn(true);
+		
 		when(videoGameRepository.findById(1))
 		.thenReturn(
 				Optional.of(
