@@ -15,10 +15,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.Matchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -74,20 +76,20 @@ public class VideoGameControllerTest {
 		verify(videoGameRepository, times(1)).findAll();
 	}
 	
-//	@Test
-//	@DisplayName("test de requette get sur la list Empty")
-//	public void findAllListEmpty() throws Exception {
-//
-//		when(videoGameRepository.findAll())
-//		.thenReturn(new ArrayList<>());
-//
-//		mockMvc.perform(get("/video-games/list"))
-//		.andExpect(status().isOk())
-//		.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-//		.andExpect((ResultMatcher) jsonPath("$", new ArrayList<>().isEmpty()));	
-//		verify(videoGameRepository, times(1)).findAll();
-//	}
-	
+	@Test
+	@DisplayName("test de requette get sur list Empty")
+	public void findAllListEmpty() throws Exception {
+
+		when(videoGameRepository.findAll())
+		.thenReturn(new ArrayList<>());
+
+		mockMvc.perform(get("/video-games/list"))
+		.andExpect(status().isOk())
+		.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+		.andExpect(jsonPath("$",hasSize(0)));
+		verify(videoGameRepository, times(1)).findAll();
+	}
+	//////////////////////////////////////////////////////////////////////////////////
 	@Test
 	@DisplayName("test de requette get sur la page-list")
 	public void findAll() throws Exception {
@@ -103,6 +105,22 @@ public class VideoGameControllerTest {
 		.andExpect(jsonPath("$.number", is(0)));
 	}
 
+	
+	@Test
+	@DisplayName("test de requette get sur la page-list empty")
+	public void findAllKo() throws Exception {
+
+		when(videoGameRepository.findAll(any(Pageable.class)))
+		.thenReturn(new PageImpl<>(new ArrayList<VideoGame>()) );
+
+		mockMvc.perform(get("/video-games/page-list"))
+		.andExpect(status().isOk())
+		.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+		.andExpect(jsonPath("$.content",hasSize(0)))
+		.andExpect(jsonPath("$.size", is(0)))
+		.andExpect(jsonPath("$.number", is(0)));
+	}
+	//////////////////////////////////////////////////////////////////////////////////
 	
 	@Test
 	@DisplayName("test de la requette get pour un videoGame d'id 1 par Path Variable")
