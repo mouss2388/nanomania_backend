@@ -16,23 +16,22 @@ import lombok.Setter;
 @Getter @Setter @NoArgsConstructor
 @Entity
 public class Image {
-	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)		private int id;
-																private String nom;
-																private String fileName;
-																private String contentType;
-	@JsonIgnore													private String storageId;
-	@JsonIgnore													private String thumbStorageId;
-	@ManyToOne @JsonIgnore										private VideoGame videoGame;
+	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+	private int id;
+	private String description;
+	@JsonIgnore													
+	private String storageId;
+	@JsonIgnore													
+	private String thumbStorageId;
 	
-	public Image(int id, String nom, String fileName, String contentType, String storageId, String thumbStorageId) {
+	@ManyToOne @JsonIgnore										
+	private VideoGame videoGame;
+
+	public Image(int id, String description, String storageId, String thumbStorageId) {
 		super();
 		this.id = id;
-		this.nom = nom;
-		this.fileName = fileName;
-		this.contentType = contentType;
+		this.description = description;
 		this.storageId = storageId;
 		this.thumbStorageId = thumbStorageId;
 	}
-
-	
 }
